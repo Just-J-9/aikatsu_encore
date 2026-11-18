@@ -785,3 +785,33 @@ html[data-theme="dark"] .previous-cancel-button,html[data-theme="dark"] .saved-c
 }
 /* 4포켓 페이지 안에서는 카드 타입 변경 표시가 포켓 위치를 밀지 않도록 고정합니다. */
 .card.card-type-row-start{grid-column:auto}
+
+/* 바인더 상단: 탄/타입 필터와 등급 포스트잇 */
+.binder-filter-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;min-height:54px;padding:0 5px}
+.binder-season-tabs{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-bottom:8px}
+.binder-season-tabs button{border:1px solid var(--theme-edge);border-radius:999px;background:var(--theme-paper);color:var(--theme-soft);padding:8px 14px;font-size:13px;cursor:pointer;transition:.16s}
+.binder-season-tabs button.active{background:var(--theme-accent);border-color:var(--theme-accent-dark);color:var(--theme-ink);font-weight:800}
+.binder-season-tabs button[hidden]{display:none}
+.binder-filter-row .binder-suit-tabs{flex:0 0 auto;gap:15px;padding-right:2%;min-height:54px}
+.binder-filter-row .suit-tab{width:50px;height:46px}
+.binder-filter-row .suit-tab.active{height:51px}
+.binder-book{padding-top:54px}
+.binder-grade-tabs{position:absolute;z-index:5;right:7%;top:8px;display:flex;align-items:flex-end;gap:12px}
+.binder-grade-tabs button{min-width:48px;height:42px;padding:0 10px;border:1px solid var(--theme-edge);border-bottom:0;border-radius:9px 9px 0 0;background:var(--theme-paper);color:var(--theme-soft);font-weight:800;font-size:14px;cursor:pointer;opacity:.48;filter:grayscale(.75);transform:translateY(5px);transition:.16s}
+.binder-grade-tabs button.active{height:48px;opacity:1;filter:none;transform:none;box-shadow:0 -3px 10px rgba(0,0,0,.08)}
+.binder-grade-tabs button[data-grade="PR"]{color:#d84d8a}
+.binder-grade-tabs button[data-grade="ER"]{color:#d4a52c}
+.binder-grade-tabs button[data-grade="R"]{color:#4b9fc6}
+.binder-grade-tabs button[data-grade="N"]{color:#777}
+@media(max-width:600px){
+ .binder-filter-row{display:flex;flex-direction:column-reverse;align-items:stretch;gap:5px;min-height:0}
+ .binder-filter-row .binder-suit-tabs{justify-content:center;gap:15px;min-height:47px;padding:0}
+ .binder-filter-row .suit-tab{width:44px;height:39px;font-size:24px}
+ .binder-filter-row .suit-tab.active{height:44px}
+ .binder-season-tabs{justify-content:center;padding:0 0 7px;gap:5px}
+ .binder-season-tabs button{padding:7px 11px;font-size:12px}
+ .binder-book{padding:54px 25px 10px}
+ .binder-grade-tabs{right:50%;top:7px;transform:translateX(50%);gap:9px}
+ .binder-grade-tabs button{min-width:42px;height:37px;font-size:13px}
+ .binder-grade-tabs button.active{height:42px}
+}
