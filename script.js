@@ -146,7 +146,33 @@ function fillSelect(id,values,order=[]){
 }
 function buildFilters(){
   buildCoordinateOptions();
-  $("seasonTabs").querySelector('[data-season="2탄"]').hidden=!cards.some(card=>seasonForId(card.id)==="2탄");
+
+  // 카드 번호의 E숫자 패턴을 찾아 존재하는 탄만 오름차순으로 표시합니다.
+  const seasons=[...new Set(cards
+    .map(card=>seasonForId(card.id))
+    .filter(season=>/^\\d+탄$/.test(season))
+  )].sort((a,b)=>Number.parseInt(a,10)-Number.parseInt(b,10));
+
+  const tabs=$("seasonTabs");
+  tabs.replaceChildren();
+
+  const addTab=(season,label)=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.dataset.season=season;
+    button.textContent=label;
+    button.setAttribute("aria-pressed","false");
+    tabs.appendChild(button);
+  };
+
+  addTab("","전체");
+  seasons.forEach(season=>addTab(season,season));
+  addTab("프로모션","프로모션");
+
+  // 선택된 탄이 데이터에서 사라졌다면 전체 보기로 되돌립니다.
+  if(seasonFilter && seasonFilter!=="프로모션" && !seasons.includes(seasonFilter)){
+    seasonFilter="";
+  }
 }
 
 
