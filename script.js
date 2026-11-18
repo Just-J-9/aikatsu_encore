@@ -567,7 +567,8 @@ function render(){
   const list=filtered();
   visibleCards=list;
   let previousListType=null;
-  let previousListSeason=null;
+  let previousSuit=null;
+  let layoutSlotCount=0;
   const canonicalType=value=>{
     const key=normalize(value);
     return key==="큐트"||key==="큐티"?"큐트":key;
@@ -575,11 +576,24 @@ function render(){
 
   list.forEach((card,index)=>{
     const listType=canonicalType(card.type);
-    const listSeason=seasonForId(card.id);
-    const seasonChanged=listSeason!==previousListSeason;
-    const typeChanged=listType!==previousListType;
-    // 같은 탄 안에서 타입이 바뀌면 새 행을 시작합니다. 프로모션은 타입 구분을 적용하지 않습니다.
-    if(index%4===0){
+    const currentSuit=suitForType(card.type);
+
+    // 큐트·쿨·섹시·팝 타입이 바뀌면 다음 4포켓 페이지에서 시작하도록 빈 칸을 채웁니다.
+    if(currentSuit&&previousSuit&&currentSuit!==previousSuit){
+      while(layoutSlotCount%4!==0){
+        if(layoutSlotCount%4===0){
+          const page=document.createElement("div");
+          page.className="card-page";
+          grid.appendChild(page);
+        }
+        const gap=document.createElement("div");
+        gap.className="card-page-gap";
+        grid.lastElementChild.appendChild(gap);
+        layoutSlotCount++;
+      }
+    }
+
+    if(layoutSlotCount%4===0){
       const page=document.createElement("div");
       page.className="card-page";
       grid.appendChild(page);
@@ -587,9 +601,9 @@ function render(){
     const page=grid.lastElementChild;
     const el=document.createElement("article");
     el.className="card"+(isOwned(card)?" owned-card":" unowned-card");
-    if(index===0||seasonChanged||(listSeason!=="프로모션"&&typeChanged))el.classList.add("card-type-row-start");
+    if(index===0|| (currentSuit&&previousSuit&&currentSuit!==previousSuit))el.classList.add("card-type-row-start");
     previousListType=listType;
-    previousListSeason=listSeason;
+    previousSuit=currentSuit||previousSuit;
     const accessory=isAccessory(card);
     const heart=isWishlisted(card);
     el.innerHTML=`<div class="card-image${accessory?" accessory-card":""}">
@@ -625,9 +639,10 @@ function render(){
       openModal(card);
     });
     page.appendChild(el);
+    layoutSlotCount++;
   });
 
-  pageCount=Math.ceil(list.length/4);
+  pageCount=Math.ceil(layoutSlotCount/4);
   const mobile=window.matchMedia("(max-width:600px)").matches;
   currentPageIndex=Math.min(currentPageIndex,Math.max(0,pageCount-(mobile?1:2)));
   if(!mobile)currentPageIndex=Math.floor(currentPageIndex/2)*2;
