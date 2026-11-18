@@ -568,13 +568,7 @@ function render(){
   visibleCards=list;
   let previousSuit=null;
   let layoutSlotCount=0;
-  const canonicalType=value=>{
-    const key=normalize(value);
-    return key==="큐트"||key==="큐티"?"큐트":key;
-  };
-
   list.forEach((card,index)=>{
-    const listType=canonicalType(card.type);
     const currentSuit=suitForType(card.type);
 
     // 큐트·쿨·섹시·팝 타입이 바뀌면 다음 4포켓 페이지에서 시작하도록 빈 칸을 채웁니다.
