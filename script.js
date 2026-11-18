@@ -6,6 +6,8 @@ let cards=[];
 let currentPageIndex=0;
 let pageCount=0;
 let suitFilter=null;
+let gradeFilter=null;
+let seasonFilter="";
 let touchStartX=0;
 let touchStartY=0;
 let visibleCards=[];
@@ -143,49 +145,8 @@ function fillSelect(id,values,order=[]){
   });
 }
 function buildFilters(){
-  fillSelect("category",cards.map(x=>x.category),["풀코디","상의","하의","원피스","슈즈","액세서리"]);
   buildCoordinateOptions();
-  // 시트의 실제 표기인 '큐트'와 '큐티'를 같은 항목으로 인식해 지정 순서로 정렬합니다.
-  const typeOrder=["큐트","큐티","쿨","섹시","팝"];
-  const typeValues=[...new Set(cards.map(x=>String(x.type??"")).filter(v=>v.trim()))];
-  const canonicalType=value=>{
-    const key=normalize(value);
-    if(key==="큐트"||key==="큐티")return "큐트";
-    return key;
-  };
-  const typeRank=value=>typeOrder.findIndex(item=>canonicalType(item)===canonicalType(value));
-  const typeSelect=$("type"), typeFirst=typeSelect.options[0];
-  typeSelect.innerHTML="";
-  typeSelect.appendChild(typeFirst);
-  typeValues.sort((a,b)=>{
-    const ra=typeRank(a), rb=typeRank(b);
-    if(ra===-1 && rb===-1)return a.localeCompare(b,"ko");
-    if(ra===-1)return 1;
-    if(rb===-1)return -1;
-    return ra-rb;
-  }).forEach(v=>{
-    const option=document.createElement("option");
-    option.value=v;
-    option.textContent=v;
-    typeSelect.appendChild(option);
-  });
-  fillSelect("grade",cards.map(x=>x.grade),["ER","PR","R","N"]);
-  const seasonValues=[...new Set(cards.map(x=>seasonForId(x.id)))];
-  const seasonOrder=(a,b)=>{
-    if(a==="프로모션")return b==="프로모션"?0:1;
-    if(b==="프로모션")return -1;
-    if(a==="기타")return 1;
-    if(b==="기타")return -1;
-    return Number.parseInt(a,10)-Number.parseInt(b,10);
-  };
-  const seasonSelect=$("season");
-  const seasonFirst=seasonSelect.options[0];
-  seasonSelect.innerHTML="";
-  seasonSelect.appendChild(seasonFirst);
-  seasonValues.sort(seasonOrder).forEach(value=>{
-    const option=document.createElement("option");
-    option.value=value;option.textContent=value;seasonSelect.appendChild(option);
-  });
+  $("seasonTabs").querySelector('[data-season="2탄"]').hidden=!cards.some(card=>seasonForId(card.id)==="2탄");
 }
 
 
@@ -560,11 +521,10 @@ function suitForType(value){
 }
 function filtered(){
   const q=$( "search").value.trim().toLowerCase();
-  const cat=$("category").value,type=$("type").value,grade=$("grade").value,season=$("season").value;
+
   return cards.filter(x=>
     (!q||[x.id,x.category,x.type,x.grade,x.nameJa,x.nameKo].some(v=>String(v).toLowerCase().includes(q)))&&
-    (!cat||x.category===cat)&&(!type||x.type===type)&&(!grade||x.grade===grade)&&
-    (!season||seasonForId(x.id)===season)&&(!suitFilter||suitForType(x.type)===suitFilter)&&(!wishlistOnly||isWishlisted(x))&&
+    (!seasonFilter||seasonForId(x.id)===seasonFilter)&&(!gradeFilter||normalize(x.grade)===normalize(gradeFilter))&&(!suitFilter||suitForType(x.type)===suitFilter)&&(!wishlistOnly||isWishlisted(x))&&
     (!ownedFilter||(ownedFilter==="owned"?isOwned(x):!isOwned(x)))
   );
 }
@@ -577,8 +537,7 @@ function updateCollectionCount(){
 function render(){
   const grid=$("grid");
   grid.innerHTML="";
-  currentPageIndex=0;
-  // 한 페이지는 4포켓(2x2)이며, 데스크톱에서는 두 페이지를 한 화면에 펼칩니다.
+  // 카드 상태 변경이나 필터 재렌더링 후에도 현재 페이지를 유지합니다.
   const list=filtered();
   visibleCards=list;
   let previousListType=null;
@@ -643,7 +602,18 @@ function render(){
   });
 
   pageCount=Math.ceil(list.length/4);
+  const mobile=window.matchMedia("(max-width:600px)").matches;
+  currentPageIndex=Math.min(currentPageIndex,Math.max(0,pageCount-(mobile?1:2)));
+  if(!mobile)currentPageIndex=Math.floor(currentPageIndex/2)*2;
   updateBinderPager();
+  document.querySelectorAll("#seasonTabs [data-season]").forEach(button=>{
+    const active=button.dataset.season===seasonFilter;
+    button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
+  });
+  document.querySelectorAll("#gradeTabs [data-grade]").forEach(button=>{
+    const active=button.dataset.grade===gradeFilter;
+    button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
+  });
   document.querySelectorAll(".suit-tab").forEach(button=>{
     const active=button.dataset.suit===suitFilter;
     button.classList.toggle("active",active);
@@ -959,7 +929,7 @@ grid.addEventListener("touchend",e=>{
   if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))goPage(dx<0?1:-1);
 },{passive:true});
 
-["search","category","type","grade","season"].forEach(id=>$(id).addEventListener("input",render));
+$("search").addEventListener("input",render);
 $("suitTabs").addEventListener("click",event=>{
   const button=event.target.closest("[data-suit]");
   if(!button)return;
