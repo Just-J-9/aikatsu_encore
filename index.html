@@ -97,12 +97,6 @@
       <span class="search-icon">⌕</span>
       <input id="search" type="search" placeholder="ID / 이름 / 카테고리 검색" autocomplete="off">
     </div>
-    <div class="filters">
-      <select id="season"><option value="">탄 전체</option></select>
-      <select id="category"><option value="">카테고리 전체</option></select>
-      <select id="grade"><option value="">등급 전체</option></select>
-      <select id="type"><option value="">타입 전체</option></select>
-    </div>
     <div class="collection-tools">
       <div id="collectionCount" class="collection-count">보유 카드 0장 · 전체 0장</div>
       <div class="collection-filter-buttons">
@@ -156,13 +150,26 @@
     <div id="loading">카드를 불러오는 중...</div>
     <div id="error" hidden></div>
     <section class="binder" aria-label="4포켓 6공 카드 바인더">
-      <div id="suitTabs" class="binder-suit-tabs" role="group" aria-label="카드 타입 문양 필터">
+      <div class="binder-filter-row">
+        <div id="seasonTabs" class="binder-season-tabs" role="group" aria-label="탄 구분 필터">
+          <button type="button" data-season="" aria-pressed="true" class="active">전체</button>
+          <button type="button" data-season="1탄" aria-pressed="false">1탄</button>
+          <button type="button" data-season="2탄" aria-pressed="false" hidden>2탄</button>
+          <button type="button" data-season="프로모션" aria-pressed="false">프로모션</button>
+        </div>
+        <div id="suitTabs" class="binder-suit-tabs" role="group" aria-label="카드 타입 문양 필터">
         <button type="button" class="suit-tab suit-heart" data-suit="heart" aria-label="하트 큐트 타입" aria-pressed="false">♥</button>
         <button type="button" class="suit-tab suit-diamond" data-suit="diamond" aria-label="다이아 쿨 타입" aria-pressed="false">♦</button>
         <button type="button" class="suit-tab suit-club" data-suit="club" aria-label="클로버 팝 타입" aria-pressed="false">♣</button>
         <button type="button" class="suit-tab suit-spade" data-suit="spade" aria-label="스페이드 섹시 타입" aria-pressed="false">♠</button>
       </div>
       <div class="binder-book">
+        <div id="gradeTabs" class="binder-grade-tabs" role="group" aria-label="등급 필터">
+          <button type="button" data-grade="PR" aria-pressed="false">PR</button>
+          <button type="button" data-grade="ER" aria-pressed="false">ER</button>
+          <button type="button" data-grade="R" aria-pressed="false">R</button>
+          <button type="button" data-grade="N" aria-pressed="false">N</button>
+        </div>
         <button id="pagePrev" class="binder-arrow binder-arrow-prev" type="button" aria-label="이전 페이지">‹</button>
         <section id="grid" class="card-grid" aria-live="polite"></section>
         <button id="pageNext" class="binder-arrow binder-arrow-next" type="button" aria-label="다음 페이지">›</button>
