@@ -566,7 +566,6 @@ function render(){
   // 카드 상태 변경이나 필터 재렌더링 후에도 현재 페이지를 유지합니다.
   const list=filtered();
   visibleCards=list;
-  let previousListType=null;
   let previousSuit=null;
   let layoutSlotCount=0;
   const canonicalType=value=>{
@@ -581,11 +580,6 @@ function render(){
     // 큐트·쿨·섹시·팝 타입이 바뀌면 다음 4포켓 페이지에서 시작하도록 빈 칸을 채웁니다.
     if(currentSuit&&previousSuit&&currentSuit!==previousSuit){
       while(layoutSlotCount%4!==0){
-        if(layoutSlotCount%4===0){
-          const page=document.createElement("div");
-          page.className="card-page";
-          grid.appendChild(page);
-        }
         const gap=document.createElement("div");
         gap.className="card-page-gap";
         grid.lastElementChild.appendChild(gap);
@@ -602,7 +596,6 @@ function render(){
     const el=document.createElement("article");
     el.className="card"+(isOwned(card)?" owned-card":" unowned-card");
     if(index===0|| (currentSuit&&previousSuit&&currentSuit!==previousSuit))el.classList.add("card-type-row-start");
-    previousListType=listType;
     previousSuit=currentSuit||previousSuit;
     const accessory=isAccessory(card);
     const heart=isWishlisted(card);
