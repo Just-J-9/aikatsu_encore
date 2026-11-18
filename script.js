@@ -168,6 +168,7 @@ function buildFilters(){
   addTab("","전체");
   seasons.forEach(season=>addTab(season,season));
   addTab("프로모션","프로모션");
+  addTab("등록된 카드","등록된 카드");
 
   // 선택된 탄이 데이터에서 사라졌다면 전체 보기로 되돌립니다.
   if(seasonFilter && seasonFilter!=="프로모션" && !seasons.includes(seasonFilter)){
@@ -545,12 +546,46 @@ function suitForType(value){
   if(type==="섹시")return "spade";
   return null;
 }
+const registeredBinderImageUrls=new Map();
+function registeredCardImageUrl(card){
+  if(card.image instanceof Blob){
+    const cached=registeredBinderImageUrls.get(card.id);
+    if(cached&&cached.blob===card.image)return cached.url;
+    if(cached)URL.revokeObjectURL(cached.url);
+    const url=URL.createObjectURL(card.image);
+    registeredBinderImageUrls.set(card.id,{blob:card.image,url});
+    return url;
+  }
+  const cached=registeredBinderImageUrls.get(card.id);
+  if(cached){URL.revokeObjectURL(cached.url);registeredBinderImageUrls.delete(card.id);}
+  return card.imageUrl||"";
+}
+function registeredCardsForBinder(){
+  return previousCards.map(card=>{
+    const image=registeredCardImageUrl(card);
+    return {
+      id:"REGISTERED-"+card.id,
+      sourceId:card.id,
+      nameKo:card.name,
+      nameJa:card.name,
+      type:card.type||"",
+      category:card.category||"",
+      grade:"",
+      front:image,
+      back:image,
+      registered:true
+    };
+  });
+}
 function filtered(){
   const q=$( "search").value.trim().toLowerCase();
-
-  return cards.filter(x=>
+  const source=seasonFilter==="등록된 카드"?registeredCardsForBinder():cards;
+  return source.filter(x=>
     (!q||[x.id,x.category,x.type,x.grade,x.nameJa,x.nameKo].some(v=>String(v).toLowerCase().includes(q)))&&
-    (!seasonFilter||seasonForId(x.id)===seasonFilter)&&(!gradeFilter||normalize(x.grade)===normalize(gradeFilter))&&(!suitFilter||suitForType(x.type)===suitFilter)&&(!wishlistOnly||isWishlisted(x))&&
+    (!seasonFilter||seasonFilter==="등록된 카드"||seasonForId(x.id)===seasonFilter)&&
+    (!gradeFilter||normalize(x.grade)===normalize(gradeFilter))&&
+    (!suitFilter||suitForType(x.type)===suitFilter)&&
+    (!wishlistOnly||isWishlisted(x))&&
     (!ownedFilter||(ownedFilter==="owned"?isOwned(x):!isOwned(x)))
   );
 }
@@ -567,12 +602,16 @@ function render(){
   const list=filtered();
   visibleCards=list;
   let previousSuit=null;
+  let previousSeason=null;
   let layoutSlotCount=0;
   list.forEach((card,index)=>{
+    const cardSeason=card.registered?"등록된 카드":seasonForId(card.id);
+    const numberedSeason=/^\\d+탄$/.test(cardSeason);
     const currentSuit=suitForType(card.type);
 
-    // 큐트·쿨·섹시·팝 타입이 바뀌면 다음 4포켓 페이지에서 시작하도록 빈 칸을 채웁니다.
-    if(currentSuit&&previousSuit&&currentSuit!==previousSuit){
+    // 타입별 페이지 구분은 각 n탄 안에서만 적용합니다. 프로모션과 직접 등록 카드는 제외합니다.
+    if(!numberedSeason||cardSeason!==previousSeason)previousSuit=null;
+    if(numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit){
       while(layoutSlotCount%4!==0){
         const gap=document.createElement("div");
         gap.className="card-page-gap";
@@ -589,8 +628,9 @@ function render(){
     const page=grid.lastElementChild;
     const el=document.createElement("article");
     el.className="card"+(isOwned(card)?" owned-card":" unowned-card");
-    if(index===0|| (currentSuit&&previousSuit&&currentSuit!==previousSuit))el.classList.add("card-type-row-start");
-    previousSuit=currentSuit||previousSuit;
+    if(index===0||(numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit))el.classList.add("card-type-row-start");
+    if(numberedSeason)previousSuit=currentSuit||previousSuit;
+    previousSeason=cardSeason;
     const accessory=isAccessory(card);
     const heart=isWishlisted(card);
     el.innerHTML=`<div class="card-image${accessory?" accessory-card":""}">
