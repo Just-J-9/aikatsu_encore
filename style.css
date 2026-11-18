@@ -815,3 +815,7 @@ html[data-theme="dark"] .previous-cancel-button,html[data-theme="dark"] .saved-c
  .binder-grade-tabs button{min-width:42px;height:37px;font-size:13px}
  .binder-grade-tabs button.active{height:42px}
 }
+
+
+/* 빈 포켓: 타입이 바뀌는 지점에서 바인더 페이지를 채웁니다. */
+.card-page-gap{visibility:hidden;min-height:1px;pointer-events:none}
