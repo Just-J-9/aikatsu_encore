@@ -3,8 +3,9 @@ const SHEET_GID="1943463274";
 const endpoint=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}&range=A2:H`;
 
 let cards=[];
-let mobilePage=0;
-let mobilePageCount=0;
+let currentPageIndex=0;
+let pageCount=0;
+let suitFilter=null;
 let touchStartX=0;
 let touchStartY=0;
 let visibleCards=[];
@@ -25,7 +26,7 @@ function applyTheme(theme,save=false){
     button.classList.toggle("active",active);
     button.setAttribute("aria-pressed",String(active));
   });
-  const themeColors={pink:"#f7bfd0",yellow:"#f3d66b",lime:"#b9d98a",blue:"#168bd1",purple:"#c8b6ed",dark:"#17191f"};
+  const themeColors={pink:"#f7bfd0",yellow:"#f0d17a",lime:"#b9d98a",blue:"#80cde2",purple:"#c8b6ed",dark:"#17191f"};
   const meta=document.querySelector('meta[name="theme-color"]');
   if(meta)meta.content=themeColors[selected];
   if(save){try{localStorage.setItem(THEME_KEY,selected);}catch(e){}}
@@ -549,13 +550,21 @@ function renderPreviousCards(){
     grid.appendChild(article);
   });
 }
+function suitForType(value){
+  const type=normalize(value);
+  if(type==="큐트"||type==="큐티")return "heart";
+  if(type==="쿨")return "diamond";
+  if(type==="팝")return "club";
+  if(type==="섹시")return "spade";
+  return null;
+}
 function filtered(){
   const q=$( "search").value.trim().toLowerCase();
   const cat=$("category").value,type=$("type").value,grade=$("grade").value,season=$("season").value;
   return cards.filter(x=>
     (!q||[x.id,x.category,x.type,x.grade,x.nameJa,x.nameKo].some(v=>String(v).toLowerCase().includes(q)))&&
     (!cat||x.category===cat)&&(!type||x.type===type)&&(!grade||x.grade===grade)&&
-    (!season||seasonForId(x.id)===season)&&(!wishlistOnly||isWishlisted(x))&&
+    (!season||seasonForId(x.id)===season)&&(!suitFilter||suitForType(x.type)===suitFilter)&&(!wishlistOnly||isWishlisted(x))&&
     (!ownedFilter||(ownedFilter==="owned"?isOwned(x):!isOwned(x)))
   );
 }
@@ -568,8 +577,8 @@ function updateCollectionCount(){
 function render(){
   const grid=$("grid");
   grid.innerHTML="";
-  mobilePage=0;
-  // 일반 시즌은 탄/타입이 바뀔 때 새 행을 시작하고, 프로모션은 첫 카드만 새 행에서 시작합니다.
+  currentPageIndex=0;
+  // 한 페이지는 4포켓(2x2)이며, 데스크톱에서는 두 페이지를 한 화면에 펼칩니다.
   const list=filtered();
   visibleCards=list;
   let previousListType=null;
@@ -633,8 +642,13 @@ function render(){
     page.appendChild(el);
   });
 
-  mobilePageCount=Math.ceil(list.length/4);
-  updateMobilePager();
+  pageCount=Math.ceil(list.length/4);
+  updateBinderPager();
+  document.querySelectorAll(".suit-tab").forEach(button=>{
+    const active=button.dataset.suit===suitFilter;
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+  });
   $("wishlistOnly").classList.toggle("active",wishlistOnly);
   $("wishlistOnly").setAttribute("aria-pressed",String(wishlistOnly));
   $("wishlistOnly").textContent=wishlistOnly?"♥ 위시리스트 보기 중":"♡ 위시리스트만 보기";
@@ -703,15 +717,24 @@ function setOwnedCount(card,count){
   if(index>=0){currentModalIndex=index;populateModal(visibleCards[index]);}
 }
 
-function updateMobilePager(){
-  const grid=$("grid");
-  grid.classList.remove("book-mode");
-  const pager=document.querySelector(".book-pager");
-  if(pager)pager.hidden=true;
+function updateBinderPager(){
+  const mobile=window.matchMedia("(max-width:600px)").matches;
+  const spreadStart=mobile?currentPageIndex:Math.floor(currentPageIndex/2)*2;
+  $("grid").querySelectorAll(".card-page").forEach((page,index)=>{
+    page.classList.toggle("page-visible",index>=spreadStart&&index<spreadStart+(mobile?1:2));
+  });
+  const shownPage=pageCount===0?0:spreadStart+1;
+  const shownEnd=pageCount===0?0:Math.min(spreadStart+(mobile?1:2),pageCount);
+  $("pageIndicator").textContent=pageCount===0?"0 페이지":(shownPage===shownEnd?shownPage+" / "+pageCount+" 페이지":shownPage+"–"+shownEnd+" / "+pageCount+" 페이지");
+  $("pagePrev").disabled=spreadStart<=0;
+  $("pageNext").disabled=pageCount===0||spreadStart+(mobile?1:2)>=pageCount;
 }
-
 function goPage(delta){
-  // 카드 목록은 모든 화면에서 한 번에 4열로 표시합니다.
+  const mobile=window.matchMedia("(max-width:600px)").matches;
+  const step=mobile?1:2;
+  const currentStart=mobile?currentPageIndex:Math.floor(currentPageIndex/2)*2;
+  currentPageIndex=Math.max(0,Math.min(Math.max(0,pageCount-1),currentStart+delta*step));
+  updateBinderPager();
 }
 
 function openModal(card){
@@ -937,6 +960,12 @@ grid.addEventListener("touchend",e=>{
 },{passive:true});
 
 ["search","category","type","grade","season"].forEach(id=>$(id).addEventListener("input",render));
-window.addEventListener("resize",updateMobilePager);
+$("suitTabs").addEventListener("click",event=>{
+  const button=event.target.closest("[data-suit]");
+  if(!button)return;
+  suitFilter=suitFilter===button.dataset.suit?null:button.dataset.suit;
+  render();
+});
+window.addEventListener("resize",updateBinderPager);
 try{const savedView=localStorage.getItem("aikatsuEncoreCurrentView");setView(savedView==="coordinate"||savedView==="previous"?savedView:"list");}catch(e){setView("list");}
 loadData();
