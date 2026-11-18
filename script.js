@@ -936,6 +936,18 @@ $("suitTabs").addEventListener("click",event=>{
   suitFilter=suitFilter===button.dataset.suit?null:button.dataset.suit;
   render();
 });
+$("seasonTabs").addEventListener("click",event=>{
+  const button=event.target.closest("[data-season]");
+  if(!button)return;
+  seasonFilter=button.dataset.season;
+  render();
+});
+$("gradeTabs").addEventListener("click",event=>{
+  const button=event.target.closest("[data-grade]");
+  if(!button)return;
+  gradeFilter=gradeFilter===button.dataset.grade?null:button.dataset.grade;
+  render();
+});
 window.addEventListener("resize",updateBinderPager);
 try{const savedView=localStorage.getItem("aikatsuEncoreCurrentView");setView(savedView==="coordinate"||savedView==="previous"?savedView:"list");}catch(e){setView("list");}
 loadData();
