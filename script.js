@@ -150,7 +150,7 @@ function buildFilters(){
   // 카드 번호의 E숫자 패턴을 찾아 존재하는 탄만 오름차순으로 표시합니다.
   const seasons=[...new Set(cards
     .map(card=>seasonForId(card.id))
-    .filter(season=>/^\\d+탄$/.test(season))
+    .filter(season=>/^\d+탄$/.test(season))
   )].sort((a,b)=>Number.parseInt(a,10)-Number.parseInt(b,10));
 
   const tabs=$("seasonTabs");
