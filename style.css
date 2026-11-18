@@ -783,3 +783,5 @@ html[data-theme="dark"] .previous-cancel-button,html[data-theme="dark"] .saved-c
  .binder-arrow-prev{left:3px}.binder-arrow-next{right:3px}
  .binder-page-indicator{padding-top:7px}
 }
+/* 4포켓 페이지 안에서는 카드 타입 변경 표시가 포켓 위치를 밀지 않도록 고정합니다. */
+.card.card-type-row-start{grid-column:auto}
