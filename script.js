@@ -636,9 +636,9 @@ function render(){
     el.innerHTML=`<div class="card-image${accessory?" accessory-card":""}">
       <img src="${esc(card.front)}" alt="${esc(card.nameKo)}" loading="lazy">
       <button class="card-heart${heart?" active":""}" type="button" aria-label="${heart?"위시리스트 해제":"위시리스트 체크"}" aria-pressed="${heart}" title="위시리스트 체크">${heart?"♥":"♡"}</button>
-      <span class="card-season">${esc(seasonForId(card.id))}</span>
+      <span class="card-season">${esc(card.registered?"등록된 카드":seasonForId(card.id))}</span>
       ${ownedCount(card)>0?`<span class="owned-quantity">X${ownedCount(card)}</span>`:""}
-    </div><div class="card-name">${esc(card.nameKo||card.nameJa||"이름 없음")}</div><div class="card-id">ID : ${esc(card.id)}</div>
+    </div><div class="card-name">${esc(card.nameKo||card.nameJa||"이름 없음")}</div><div class="card-id">ID : ${esc(card.registered?(card.sourceId||"등록 카드"):card.id)}</div>
 `;
     const quickWishlist=()=>toggleWishlist(card);
     el.querySelector(".card-heart").addEventListener("click",event=>{
@@ -795,11 +795,11 @@ function populateModal(card){
   $("detailWishlistHeart").setAttribute("aria-pressed",String(isWishlisted(card)));
   $("ownedCountValue").textContent=String(ownedCount(card));
   $("ownedMinus").disabled=ownedCount(card)<=0;
-  $("detailId").textContent=card.id||"";
+  $("detailId").textContent=card.registered?(card.sourceId||"등록 카드"):(card.id||"");
   $("detailGrade").textContent=card.grade||"";
   $("detailType").textContent=card.type||"";
   $("detailCategory").textContent=card.category||"";
-  $("detailSeason").textContent=seasonForId(card.id);
+  $("detailSeason").textContent=card.registered?"등록된 카드":seasonForId(card.id);
   $("prevCard").disabled=currentModalIndex<=0;
   $("nextCard").disabled=currentModalIndex>=visibleCards.length-1;
 }
@@ -1004,10 +1004,13 @@ $("suitTabs").addEventListener("click",event=>{
   suitFilter=suitFilter===button.dataset.suit?null:button.dataset.suit;
   render();
 });
-$("seasonTabs").addEventListener("click",event=>{
+$("seasonTabs").addEventListener("click",async event=>{
   const button=event.target.closest("[data-season]");
   if(!button)return;
   seasonFilter=button.dataset.season;
+  if(seasonFilter==="등록된 카드"){
+    await loadPreviousCards();
+  }
   render();
 });
 $("gradeTabs").addEventListener("click",event=>{
