@@ -500,7 +500,13 @@ function renderPreviousCards(){
     number.textContent=card.number?("번호 "+card.number):"번호 미등록";
     const name=document.createElement("div");
     name.className="previous-series-card-name";
-    name.textContent=card.name;
+    const nameJa=document.createElement("div");
+    nameJa.className="previous-series-card-name-ja";
+    nameJa.textContent=card.nameJa||card.name||"";
+    const nameKo=document.createElement("div");
+    nameKo.className="previous-series-card-name-ko";
+    nameKo.textContent=card.nameKo||card.name||"";
+    name.append(nameJa,nameKo);
     const category=document.createElement("span");
     category.className="previous-series-card-category";
     category.textContent=card.category;
@@ -513,15 +519,15 @@ function renderPreviousCards(){
     edit.type="button";
     edit.className="previous-series-edit";
     edit.textContent="수정";
-    edit.setAttribute("aria-label",card.name+" 수정");
+    edit.setAttribute("aria-label",(card.nameKo||card.nameJa||card.name||"카드")+" 수정");
     edit.addEventListener("click",()=>startEditingPreviousCard(card.id));
     const remove=document.createElement("button");
     remove.type="button";
     remove.className="previous-series-delete";
     remove.textContent="×";
-    remove.setAttribute("aria-label",card.name+" 삭제");
+    remove.setAttribute("aria-label",(card.nameKo||card.nameJa||card.name||"카드")+" 삭제");
     remove.addEventListener("click",async()=>{
-      if(!confirm("「"+card.name+"」 카드를 삭제할까요?"))return;
+      if(!confirm("「"+(card.nameKo||card.nameJa||card.name||"카드")+"」 카드를 삭제할까요?"))return;
       try{
         await deletePreviousCard(card.id);
         previousCards=previousCards.filter(item=>item.id!==card.id);
@@ -566,8 +572,8 @@ function registeredCardsForBinder(){
     return {
       id:"REGISTERED-"+card.id,
       sourceId:card.id,
-      nameKo:card.name,
-      nameJa:card.name,
+      nameKo:card.nameKo||card.name||"",
+      nameJa:card.nameJa||card.name||"",
       type:card.type||"",
       category:card.category||"",
       grade:"",
@@ -606,7 +612,7 @@ function render(){
   let layoutSlotCount=0;
   list.forEach((card,index)=>{
     const cardSeason=card.registered?"등록된 카드":seasonForId(card.id);
-    const numberedSeason=/^\\d+탄$/.test(cardSeason);
+    const numberedSeason=/^[0-9]+탄$/.test(cardSeason);
     const currentSuit=suitForType(card.type);
 
     // 타입별 페이지 구분은 각 n탄 안에서만 적용합니다. 프로모션과 직접 등록 카드는 제외합니다.
@@ -915,7 +921,8 @@ function startEditingPreviousCard(id){
   if(!card)return;
   editingPreviousCardId=card.id;
   $("previousCardNumber").value=card.number||"";
-  $("previousCardName").value=card.name||"";
+  $("previousCardNameJa").value=card.nameJa||card.name||"";
+  $("previousCardNameKo").value=card.nameKo||card.name||"";
   $("previousCardImageUrl").value=card.imageUrl||"";
   previousType=card.type||"큐트";
   $("previousTypeButtons").querySelectorAll("[data-type]").forEach(button=>{
@@ -942,9 +949,11 @@ $("previousCardForm").addEventListener("submit",async event=>{
   const file=$("previousCardImage").files[0];
   const imageUrl=$("previousCardImageUrl").value.trim();
   const number=$("previousCardNumber").value.trim();
-  const name=$("previousCardName").value.trim();
+  const nameJa=$("previousCardNameJa").value.trim();
+  const nameKo=$("previousCardNameKo").value.trim();
+  const legacyName=nameKo||nameJa;
   const existing=editingPreviousCardId?previousCards.find(item=>item.id===editingPreviousCardId):null;
-  if((!file&&!imageUrl&&!existing)||!name){alert("이미지 파일 또는 이미지 주소와 카드 이름을 입력해 주세요.");return;}
+  if((!file&&!imageUrl&&!existing)||(!nameJa&&!nameKo)){alert("이미지 파일 또는 이미지 주소와 일본어/한국어 카드 이름을 입력해 주세요.");return;}
   if(file&&!file.type.startsWith("image/")){alert("이미지 파일을 선택해 주세요.");return;}
   if(imageUrl){
     try{
@@ -958,7 +967,7 @@ $("previousCardForm").addEventListener("submit",async event=>{
     const card={
       ...(existing||{}),
       id:existing?existing.id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+"-"+Math.random().toString(36).slice(2)),
-      number,name,category:previousCategory,type:previousType,
+      number,name:legacyName,nameJa,nameKo,category:previousCategory,type:previousType,
       createdAt:existing?.createdAt||Date.now(),
       updatedAt:Date.now()
     };
