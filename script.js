@@ -610,6 +610,7 @@ function render(){
   let previousSuit=null;
   let previousSeason=null;
   let layoutSlotCount=0;
+  const mobileBinder=window.matchMedia("(max-width:600px)").matches;
   list.forEach((card,index)=>{
     const cardSeason=card.registered?"등록된 카드":seasonForId(card.id);
     const numberedSeason=/^[0-9]+탄$/.test(cardSeason);
@@ -617,7 +618,7 @@ function render(){
 
     // 타입별 페이지 구분은 각 n탄 안에서만 적용합니다. 프로모션과 직접 등록 카드는 제외합니다.
     if(!numberedSeason||cardSeason!==previousSeason)previousSuit=null;
-    if(numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit){
+    if(mobileBinder&&numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit){
       while(layoutSlotCount%4!==0){
         const gap=document.createElement("div");
         gap.className="card-page-gap";
@@ -634,7 +635,7 @@ function render(){
     const page=grid.lastElementChild;
     const el=document.createElement("article");
     el.className="card"+(isOwned(card)?" owned-card":" unowned-card");
-    if(index===0||(numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit))el.classList.add("card-type-row-start");
+    if(index===0||(mobileBinder&&numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit))el.classList.add("card-type-row-start");
     if(numberedSeason)previousSuit=currentSuit||previousSuit;
     previousSeason=cardSeason;
     const accessory=isAccessory(card);
