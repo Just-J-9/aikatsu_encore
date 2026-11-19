@@ -819,3 +819,8 @@ html[data-theme="dark"] .previous-cancel-button,html[data-theme="dark"] .saved-c
 
 /* 빈 포켓: 타입이 바뀌는 지점에서 바인더 페이지를 채웁니다. */
 .card-page-gap{visibility:hidden;min-height:1px;pointer-events:none}
+
+
+.previous-series-card-name-ja,.previous-series-card-name-ko{line-height:1.45;overflow-wrap:anywhere}
+.previous-series-card-name-ja{font-size:.9em;color:var(--theme-soft)}
+.previous-series-card-name-ko{font-weight:700;color:var(--theme-ink)}
