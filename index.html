@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=binder-registered-cards-20261118">
+<link rel="stylesheet" href="style.css?v=binder-card-register-names-20261119">
 </head>
 <body>
 <div class="wrap">
@@ -27,13 +27,13 @@
   </header>
   <div class="view-tabs" role="tablist" aria-label="페이지 선택">
     <button id="cardListTab" class="view-tab active" type="button" role="tab" aria-selected="true">카드 목록</button>
-    <button id="previousSeriesTab" class="view-tab" type="button" role="tab" aria-selected="false">이전 시리즈 카드</button>
+    <button id="previousSeriesTab" class="view-tab" type="button" role="tab" aria-selected="false">카드 등록</button>
     <button id="coordinateTab" class="view-tab" type="button" role="tab" aria-selected="false">코디네이트</button>
   </div>
-  <section id="previousSeriesView" class="previous-series-view" hidden aria-label="이전 시리즈 카드">
+  <section id="previousSeriesView" class="previous-series-view" hidden aria-label="카드 등록">
     <div class="previous-series-heading">
-      <h2>이전 시리즈 카드</h2>
-      <p>이미지와 카드 이름, 카테고리를 등록해 나만의 이전 시리즈 카드 목록을 만들 수 있어요.</p>
+      <h2>카드 등록</h2>
+      <p>이미지와 일본어·한국어 카드 이름, 카테고리와 타입을 등록해 나만의 카드를 관리할 수 있어요.</p>
       <p class="previous-series-storage-note">등록한 카드는 현재 브라우저에 저장돼요. 다른 기기나 브라우저와는 자동으로 공유되지 않아요.</p>
     </div>
     <form id="previousCardForm" class="previous-card-form">
@@ -53,8 +53,12 @@
             <input id="previousCardNumber" type="text" maxlength="50" placeholder="SP-001" autocomplete="off">
           </div>
           <div class="previous-field-group previous-card-name-group">
-            <label class="previous-name-label" for="previousCardName">카드 이름</label>
-            <input id="previousCardName" type="text" maxlength="100" placeholder="카드 이름을 입력해 주세요" required>
+            <label class="previous-name-label" for="previousCardNameJa">카드 이름 (일본어)</label>
+            <input id="previousCardNameJa" type="text" maxlength="100" placeholder="カード名を入力してください">
+          </div>
+          <div class="previous-field-group previous-card-name-group">
+            <label class="previous-name-label" for="previousCardNameKo">카드 이름 (한국어)</label>
+            <input id="previousCardNameKo" type="text" maxlength="100" placeholder="카드 이름을 입력해 주세요">
           </div>
         </div>
         <div class="previous-button-groups">
