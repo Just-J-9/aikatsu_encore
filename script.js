@@ -610,15 +610,18 @@ function render(){
   let previousSuit=null;
   let previousSeason=null;
   let layoutSlotCount=0;
-  const mobileBinder=window.matchMedia("(max-width:600px)").matches;
   list.forEach((card,index)=>{
     const cardSeason=card.registered?"등록된 카드":seasonForId(card.id);
     const numberedSeason=/^[0-9]+탄$/.test(cardSeason);
     const currentSuit=suitForType(card.type);
 
-    // 타입별 페이지 구분은 각 n탄 안에서만 적용합니다. 프로모션과 직접 등록 카드는 제외합니다.
+    // n탄 안에서 타입이 바뀌거나 프로모션/등록 카드 묶음이 시작되면 새 바인더 페이지에서 시작합니다.
     if(!numberedSeason||cardSeason!==previousSeason)previousSuit=null;
-    if(mobileBinder&&numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit){
+    const typeChanged=numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit;
+    const startsNewSection=(cardSeason==="프로모션"&&previousSeason!=="프로모션")
+      ||(card.registered&&previousSeason!=="등록된 카드");
+    const startsNewPage=layoutSlotCount>0&&(typeChanged||startsNewSection);
+    if(startsNewPage){
       while(layoutSlotCount%4!==0){
         const gap=document.createElement("div");
         gap.className="card-page-gap";
@@ -635,7 +638,7 @@ function render(){
     const page=grid.lastElementChild;
     const el=document.createElement("article");
     el.className="card"+(isOwned(card)?" owned-card":" unowned-card");
-    if(index===0||(mobileBinder&&numberedSeason&&currentSuit&&previousSuit&&currentSuit!==previousSuit))el.classList.add("card-type-row-start");
+    if(index===0||startsNewPage)el.classList.add("card-type-row-start");
     if(numberedSeason)previousSuit=currentSuit||previousSuit;
     previousSeason=cardSeason;
     const accessory=isAccessory(card);
