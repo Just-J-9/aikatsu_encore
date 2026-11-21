@@ -759,8 +759,8 @@ html[data-theme="dark"] .previous-cancel-button,html[data-theme="dark"] .saved-c
 .suit-tab.active{opacity:1;filter:none;transform:translateY(0);box-shadow:0 -3px 10px rgba(0,0,0,.08);height:48px}
 .suit-heart{color:#e94d83}.suit-diamond{color:#329bd2}.suit-club{color:#d2a928}.suit-spade{color:#9270c9}
 .binder-book{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:stretch;gap:8px;padding:18px 15px;border:1px solid var(--theme-edge);border-radius:18px;background:linear-gradient(135deg,var(--theme-cover-2),var(--theme-cover));box-shadow:0 8px 24px var(--theme-shadow)}
-.binder-book:before{content:"";position:absolute;z-index:2;left:50%;top:42px;bottom:42px;width:22px;transform:translateX(-50%);background:radial-gradient(circle at 50% 12px,#8b9299 0 5px,#e8edf0 5.5px 8px,transparent 8.5px) center 82px/22px 48px repeat-y;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22));pointer-events:none}
-.binder-book:after{content:"";position:absolute;z-index:1;left:50%;top:42px;width:22px;height:50px;transform:translateX(-50%);background:linear-gradient(135deg,var(--theme-cover-2),var(--theme-cover));pointer-events:none}
+.binder-book:before{display:none}
+
 .card-grid{position:relative;z-index:2;grid-column:2;grid-row:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;background:var(--theme-paper);border:1px solid var(--theme-edge);border-radius:9px;overflow:hidden;min-width:0}
 .card-page{display:none;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:10px;padding:14px;min-width:0;background:var(--theme-paper);border-right:1px solid var(--theme-line)}
 .card-page.page-visible{display:grid}
